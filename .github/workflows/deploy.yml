@@ -17,19 +17,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Check for Changes
-        id: check-changes
+      - name: Get Changed Files
+        id: changes
         run: |
-          if git diff --name-only HEAD~1 | grep -q "^${{ matrix.directory }}/"; then
+          git fetch origin main
+          git diff --name-only origin/main > changed_files.txt
+          echo "CHANGED=$(cat changed_files.txt)" >> $GITHUB_ENV
+
+      - name: Check if Directory Changed
+        id: check
+        run: |
+          if grep -q "${{ matrix.directory }}" changed_files.txt; then
             echo "changed=true" >> $GITHUB_ENV
           else
             echo "changed=false" >> $GITHUB_ENV
-        env:
-          directory: ${{ matrix.directory }}
 
-      - name: Skip if Unchanged
+      - name: Skip Deploy if Unchanged
         if: env.changed == 'false'
-        run: echo "No changes detected for ${{ matrix.directory }}, skipping deploy."
+        run: echo "No changes in ${{ matrix.directory }}, skipping deploy."
 
       - name: Install Bun
         if: env.changed == 'true'
