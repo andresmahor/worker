@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'apps/worker/**'
-      - 'apps/web/**'
 
 jobs:
   deploy:
@@ -19,11 +16,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Check for Changes
+        id: check-changes
+        run: |
+          if git diff --name-only HEAD~1 | grep -q "^${{ matrix.directory }}/"; then
+            echo "changed=true" >> $GITHUB_ENV
+          else
+            echo "changed=false" >> $GITHUB_ENV
+        env:
+          directory: ${{ matrix.directory }}
+
+      - name: Skip if Unchanged
+        if: env.changed == 'false'
+        run: echo "No changes detected for ${{ matrix.directory }}, skipping deploy."
+
       - name: Install Bun
         uses: oven-sh/setup-bun@v2
+
       - name: Install dependencies
         run: bun install
+
       - name: 'Deploy to Cloudflare'
+        if: env.changed == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
