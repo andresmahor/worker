@@ -8,6 +8,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory:
+          - apps/worker
+          - apps/web
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -21,5 +26,5 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           packageManager: 'bun'
-          workingDirectory: 'apps/worker'
+          workingDirectory: ${{ matrix.directory }}
           command: publish
