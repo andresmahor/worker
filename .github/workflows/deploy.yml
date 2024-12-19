@@ -32,9 +32,11 @@ jobs:
         run: echo "No changes detected for ${{ matrix.directory }}, skipping deploy."
 
       - name: Install Bun
+        if: env.changed == 'true'
         uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
+        if: env.changed == 'true'
         run: bun install
 
       - name: 'Deploy to Cloudflare'
