@@ -15,9 +15,11 @@ jobs:
         uses: oven-sh/setup-bun@v2
       - name: Install dependencies
         run: bun install
-      - name: "Deploy to Cloudflare"
+      - name: 'Deploy to Cloudflare'
         uses: cloudflare/wrangler-action@v3
         with:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          packageManager: "bun"
+          packageManager: 'bun'
+          workingDirectory: 'apps/worker'
+          command: publish
